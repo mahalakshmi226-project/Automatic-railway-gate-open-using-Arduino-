@@ -1,0 +1,51 @@
+#include <Servo.h>
+
+Servo railwayGate;
+
+const int irSensor1 = 2;
+const int irSensor2 = 3;
+const int servoPin = 9;
+
+const int gateOpen = 90;
+const int gateClosed = 0;
+
+void setup() {
+  pinMode(irSensor1, INPUT);
+  pinMode(irSensor2, INPUT);
+
+  railwayGate.attach(servoPin);
+
+  // Initially, the gate is open
+  railwayGate.write(gateOpen);
+
+  Serial.begin(9600);
+  Serial.println("Automatic Railway Gate Controller");
+}
+
+void loop() {
+
+  int sensor1 = digitalRead(irSensor1);
+  int sensor2 = digitalRead(irSensor2);
+
+  // Train detected by either IR sensor
+  if (sensor1 == LOW || sensor2 == LOW) {
+
+    Serial.println("Train Detected!");
+    Serial.println("Railway Gate Closing...");
+
+    railwayGate.write(gateClosed);
+    delay(3000);
+
+    // Wait until both sensors stop detecting the train
+    while (digitalRead(irSensor1) == LOW ||
+           digitalRead(irSensor2) == LOW) {
+      delay(100);
+    }
+
+    Serial.println("Train Passed!");
+    Serial.println("Railway Gate Opening...");
+
+    railwayGate.write(gateOpen);
+    delay(1000);
+  }
+}
